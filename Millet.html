@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Millet Intake & BMI Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(270deg, #a64ac9, #ff7e5f, #43cea2, #185a9d);
+      background-size: 800% 800%;
+      animation: gradientShift 20s ease infinite;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .container {
+      max-width: 650px;
+      margin: auto;
+      background: rgba(0, 0, 0, 0.45);
+      padding: 25px;
+      border-radius: 18px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    }
+    h1 {
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 6px rgba(0,0,0,0.7);
+      font-size: 28px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    input, select, button {
+      width: 95%;
+      padding: 12px;
+      margin-top: 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 18px;
+    }
+    button {
+      background: linear-gradient(to right, darkred, purple);
+      color: white;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: transform 0.2s ease;
+      font-size: 18px;
+    }
+    button:hover {
+      transform: scale(1.05);
+    }
+    #result {
+      margin-top: 25px;
+      font-size: 20px;
+      font-weight: bold;
+      min-height: 30px;
+    }
+    /* Stickman */
+    .stickman {
+      margin: 20px auto;
+      width: 60px;
+      height: 140px;
+      position: relative;
+    }
+    .stickman div {
+      background: #fff;
+      position: absolute;
+    }
+    .head {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      top: 0;
+      left: 10px;
+    }
+    .body {
+      width: 6px;
+      height: 50px;
+      top: 40px;
+      left: 27px;
+    }
+    .arm-left, .arm-right {
+      width: 40px;
+      height: 6px;
+      top: 55px;
+    }
+    .arm-left { left: -12px; transform-origin: right center; }
+    .arm-right { left: 27px; transform-origin: left center; }
+    .leg-left, .leg-right {
+      width: 6px;
+      height: 40px;
+      top: 90px;
+    }
+    .leg-left { left: 15px; transform-origin: top center; }
+    .leg-right { left: 39px; transform-origin: top center; }
+    .thinking .arm-left { animation: wave 1s infinite; }
+    .thinking .arm-right { animation: wave 1s infinite alternate; }
+    @keyframes wave {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(20deg); }
+      100% { transform: rotate(0deg); }
+    }
+    .speech {
+      margin-top: 10px;
+      font-style: italic;
+      min-height: 25px;
+      font-size: 18px;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 14px;
+      color: #ffebcd;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Millet Intake & BMI Calculator</h1>
+    
+    <label for="gender">Gender:</label>
+    <select id="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+
+    <label for="age">Age (years):</label>
+    <input type="number" id="age" placeholder="Enter your age">
+    
+    <label for="height">Height (cm):</label>
+    <input type="number" id="height" placeholder="Enter your height">
+    
+    <label for="weight">Weight (kg):</label>
+    <input type="number" id="weight" placeholder="Enter your weight">
+    
+    <label for="disease">Health Condition:</label>
+    <select id="disease">
+      <option value="none">None</option>
+      <option value="diabetes">Diabetes</option>
+      <option value="obesity">Obesity</option>
+      <option value="hypertension">Hypertension</option>
+      <option value="heart">Heart Disease</option>
+      <option value="cholesterol">Cholesterol</option>
+    </select>
+    
+    <button onclick="calculateIntake()">Calculate</button>
+    <button onclick="resetForm()">Reset</button>
+    
+    <div class="stickman" id="stickman">
+      <div class="head"></div>
+      <div class="body"></div>
+      <div class="arm-left"></div>
+      <div class="arm-right"></div>
+      <div class="leg-left"></div>
+      <div class="leg-right"></div>
+    </div>
+    <div class="speech" id="speech">Hey there!</div>
+    <div id="result"></div>
+    <div class="note">ℹ️ Note: Millets should be part of a balanced diet, not the only cereal.</div>
+  </div>
+
+  <script>
+    function calculateIntake() {
+      let age = parseInt(document.getElementById("age").value);
+      let height = parseFloat(document.getElementById("height").value);
+      let weight = parseFloat(document.getElementById("weight").value);
+      let disease = document.getElementById("disease").value;
+      let resultBox = document.getElementById("result");
+      let speech = document.getElementById("speech");
+      let stickman = document.getElementById("stickman");
+
+      if (isNaN(age) || isNaN(height) || isNaN(weight)) {
+        resultBox.innerText = "⚠️ Please enter valid details.";
+        return;
+      }
+
+      // Millet Intake Logic
+      let intake = 35; // default adult
+      if (age < 12) intake = 25;
+      else if (age < 18) intake = 30;
+
+      if (disease === "diabetes") intake += 5;
+      if (disease === "obesity") intake -= 5;
+      if (disease === "cholesterol") intake -= 3;
+
+      if (weight > 60) intake += Math.floor((weight - 60) / 10) * 2;
+      else if (weight < 40) intake -= Math.floor((40 - weight) / 10) * 2;
+
+      if (intake < 25) intake = 25;
+      if (intake > 50) intake = 50;
+
+      // BMI Calculation
+      let heightM = height / 100;
+      let bmi = weight / (heightM * heightM);
+      let bmiStatus = "";
+      if (bmi < 18.5) bmiStatus = "Underweight";
+      else if (bmi < 24.9) bmiStatus = "Normal";
+      else if (bmi < 29.9) bmiStatus = "Overweight";
+      else bmiStatus = "Obese";
+
+      // Animation
+      stickman.classList.add("thinking");
+      speech.innerText = "Hmm... calculating...";
+      resultBox.innerText = "";
+
+      setTimeout(() => {
+        stickman.classList.remove("thinking");
+        speech.innerText = "Here you go!";
+        resultBox.innerHTML = 
+          "✅ Recommended Millet Intake: " + intake + " g/day<br>" +
+          "📊 BMI: " + bmi.toFixed(1) + " (" + bmiStatus + ")";
+      }, 2000);
+    }
+
+    function resetForm() {
+      document.getElementById("gender").value = "male";
+      document.getElementById("age").value = "";
+      document.getElementById("height").value = "";
+      document.getElementById("weight").value = "";
+      document.getElementById("disease").value = "none";
+      document.getElementById("result").innerText = "";
+      document.getElementById("speech").innerText = "Hey there!";
+    }
+  </script>
+</body>
+</html>
